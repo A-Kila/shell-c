@@ -13,7 +13,7 @@ int main(int argc, char *argv[]) {
 
         char command[SHELL_MAX_CHARS];
         fgets(command, SHELL_MAX_CHARS, stdin);
-        command[sizeof(command) - 1] = '\0';
+        command[strlen(command) - 1] = '\0';
 
         if (!strcmp(command, "exit")) {
             break;
