@@ -4,6 +4,7 @@
 #include <string.h>
 #include <stdbool.h>
 #include <sys/unistd.h>
+#include <sys/wait.h>
 #include <unistd.h>
 
 #define BUFFER_SIZE 1024
@@ -25,7 +26,7 @@ bool find_program(char *path_buffer, char *program) {
         sprintf(file, "%s/%s", folder, program);
 
         if (!access(file, X_OK)) {
-            strcpy(path_buffer, file);
+            if (path_buffer) strcpy(path_buffer, file);
             return true;
         }
     }
@@ -134,10 +135,22 @@ int main(int argc, char *argv[]) {
         char *arg = strtok(command, " ");
         for (int i = 0; arg != NULL; i++) {
             exec_argv[i] = arg;
-            printf("%s\n", arg);
+            printf("%s\n", exec_argv[i]);
             arg = strtok(NULL, " ");
         }
-        execvp(argv[0], argv + 1);
+
+        if (find_program(NULL, exec_argv[0]))
+        {
+            pid_t pid = fork();
+            if (pid == 0) {
+                execvp(exec_argv[0], exec_argv + 1);
+            } else {
+                waitpid(pid, NULL, 0);
+            }
+
+            continue;
+        }
+
 
         // error message
         printf("%s: command not found\n", command);
