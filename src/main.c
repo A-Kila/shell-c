@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 
 int main(int argc, char *argv[]) {
     // Flush after every printf
@@ -10,6 +11,10 @@ int main(int argc, char *argv[]) {
 
         char command[256];
         scanf("%255s", command);
+
+        if (strcmp(command, "exit")) {
+            break;
+        }
 
         // error message
         printf("%s: command not found\n", command);
