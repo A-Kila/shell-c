@@ -6,13 +6,13 @@
 #include <sys/unistd.h>
 #include <unistd.h>
 
-#define SHELL_MAX_CHARS 256
+#define BUFFER_SIZE 1024
 #define NUM_BUILTINS 3
 
 // HELPER FUNCTIONS
 
-bool which_helper(char *path_buffer, char *program) {
-    char path_var[SHELL_MAX_CHARS];
+bool find_program(char *path_buffer, char *program) {
+    char path_var[BUFFER_SIZE];
     path_var[0] = 0;
     strcpy(path_var, getenv("PATH"));
 
@@ -21,7 +21,7 @@ bool which_helper(char *path_buffer, char *program) {
     for (char *folder = strtok(path_var, ":"); folder != NULL; 
             folder = strtok(NULL, ":")) 
     {
-        char file[SHELL_MAX_CHARS];
+        char file[BUFFER_SIZE];
         sprintf(file, "%s/%s", folder, program);
 
         if (!access(file, X_OK)) {
@@ -79,8 +79,8 @@ bool type(char *arguments) {
         return false;
     }
 
-    char path[SHELL_MAX_CHARS];
-    if (which_helper(path, arguments)) {
+    char path[BUFFER_SIZE];
+    if (find_program(path, arguments)) {
         printf("%s is %s\n", arguments, path);
         return false;
     }
@@ -97,8 +97,8 @@ int main(int argc, char *argv[]) {
     while (true) {
         printf("$ ");
 
-        char command[SHELL_MAX_CHARS];
-        fgets(command, SHELL_MAX_CHARS, stdin);
+        char command[BUFFER_SIZE];
+        fgets(command, BUFFER_SIZE, stdin);
         command[strlen(command) - 1] = '\0';
 
         // locate builtin commands
@@ -106,7 +106,7 @@ int main(int argc, char *argv[]) {
         for (int i = 0; i < NUM_BUILTINS; i++) {
             bool found = false;
             if (builtins[i].needs_args) {
-                char cmp_name[SHELL_MAX_CHARS];
+                char cmp_name[BUFFER_SIZE];
                 strcpy(cmp_name, builtins[i].name);
                 size_t len_name = strlen(builtins[i].name);
                 strcpy(cmp_name + len_name, " ");
@@ -129,7 +129,15 @@ int main(int argc, char *argv[]) {
                 continue;
         }
 
-        // locate executable in PATH
+        // execute from path
+        char *exec_argv[BUFFER_SIZE] = { NULL };
+        char *arg = strtok(command, " ");
+        for (int i = 0; arg != NULL; i++) {
+            exec_argv[i] = arg;
+            printf("%s\n", arg);
+            arg = strtok(NULL, " ");
+        }
+        execvp(argv[0], argv + 1);
 
         // error message
         printf("%s: command not found\n", command);
