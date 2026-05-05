@@ -2,6 +2,8 @@
 #include <stdlib.h>
 #include <string.h>
 
+#define SHELL_MAX_CHARS 256
+
 int main(int argc, char *argv[]) {
     // Flush after every printf
     setbuf(stdout, NULL);
@@ -9,12 +11,14 @@ int main(int argc, char *argv[]) {
     while (1) {
         printf("$ ");
 
-        char command[256];
-        scanf("%255s", command);
+        char command[SHELL_MAX_CHARS];
+        fgets(command, SHELL_MAX_CHARS, stdin);
+        command[sizeof(command) - 1] = '\0';
 
         if (!strcmp(command, "exit")) {
             break;
-        } 
+        }
+
         if (!strncmp(command, "echo ", 5)) {
             printf("%s\n", command + 5);
         } else {
