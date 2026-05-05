@@ -14,10 +14,13 @@ int main(int argc, char *argv[]) {
 
         if (!strcmp(command, "exit")) {
             break;
+        } 
+        if (!strncmp(command, "echo ", 5)) {
+            printf("%s\n", command);
+        } else {
+            // error message
+            printf("%s: command not found\n", command);
         }
-
-        // error message
-        printf("%s: command not found\n", command);
     }
 
     return 0;
