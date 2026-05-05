@@ -135,7 +135,6 @@ int main(int argc, char *argv[]) {
         char *arg = strtok(command, " ");
         for (int i = 0; arg != NULL; i++) {
             exec_argv[i] = arg;
-            printf("%s\n", exec_argv[i]);
             arg = strtok(NULL, " ");
         }
 
@@ -143,7 +142,7 @@ int main(int argc, char *argv[]) {
         {
             pid_t pid = fork();
             if (pid == 0) {
-                execvp(exec_argv[0], exec_argv + 1);
+                execvp(exec_argv[0], exec_argv);
             } else {
                 waitpid(pid, NULL, 0);
             }
