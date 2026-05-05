@@ -12,8 +12,11 @@
 // HELPER FUNCTIONS
 
 bool which_helper(char *path_buffer, char *program) {
-    char *path_var = getenv("PATH");
-    if (!path_var) return false;
+    char path_var[SHELL_MAX_CHARS];
+    path_var[0] = 0;
+    strcpy(path_var, getenv("PATH"));
+
+    if (!path_var[0]) return false;
 
     for (char *folder = strtok(path_var, ":"); folder != NULL; 
             folder = strtok(NULL, ":")) 
