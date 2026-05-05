@@ -15,11 +15,13 @@ bool which_helper(char *path_buffer, char *program) {
     char *path_var = getenv("PATH");
     if (!path_var) return false;
 
-    for (char *folder = strtok(path_var, ":"); folder != NULL; strtok(path_var, ":")) {
+    for (char *folder = strtok(path_var, ":"); folder != NULL; 
+            folder = strtok(NULL, ":")) 
+    {
         char file[SHELL_MAX_CHARS];
         sprintf(file, "%s/%s", folder, program);
 
-        if (access(file, X_OK)) {
+        if (!access(file, X_OK)) {
             strcpy(path_buffer, file);
             return true;
         }
