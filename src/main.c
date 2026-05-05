@@ -8,7 +8,7 @@ int main(int argc, char *argv[]) {
     printf("$ ");
 
     char command[256];
-    scanf("255%s", command);
+    scanf("%255s", command);
 
     // error message
     printf("{%s}: command not found\n", command);
