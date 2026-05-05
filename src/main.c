@@ -2,10 +2,15 @@
 #include <stdlib.h>
 
 int main(int argc, char *argv[]) {
-  // Flush after every printf
-  setbuf(stdout, NULL);
+    // Flush after every printf
+    setbuf(stdout, NULL);
 
-  printf("$ ");
+    printf("$ ");
 
-  return 0;
+    char *command = argv[1];
+
+    // error message
+    printf("{%s}: command not found\n", command);
+
+    return 0;
 }
