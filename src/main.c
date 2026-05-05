@@ -12,7 +12,7 @@ int main(int argc, char *argv[]) {
         char command[256];
         scanf("%255s", command);
 
-        if (strcmp(command, "exit")) {
+        if (!strcmp(command, "exit")) {
             break;
         }
 
