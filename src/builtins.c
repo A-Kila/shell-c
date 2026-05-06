@@ -84,7 +84,7 @@ bool cd(const command_t *command) {
     }
 
     if (chdir(command->argv[1]) != 0) {
-        printf("cd: %s: No such file or directory\n", command->argv[0]);
+        printf("cd: %s: No such file or directory\n", command->argv[1]);
     }
 
     return false;
