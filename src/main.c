@@ -1,105 +1,14 @@
+#include "execute.h"
+#include "shell.h"
+
+#include "builtins.h"
+#include "parser.h"
 #include <stddef.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include <string.h>
 #include <stdbool.h>
-#include <sys/unistd.h>
-#include <sys/wait.h>
-#include <unistd.h>
+#include <string.h>
 
-#define BUFFER_SIZE 1024
-#define NUM_BUILTINS 4
-
-// HELPER FUNCTIONS
-
-bool find_program(char *path_buffer, char *program) {
-    char path_var[BUFFER_SIZE];
-    path_var[0] = 0;
-    strcpy(path_var, getenv("PATH"));
-
-    if (!path_var[0]) return false;
-
-    for (char *folder = strtok(path_var, ":"); folder != NULL; 
-            folder = strtok(NULL, ":")) 
-    {
-        char file[BUFFER_SIZE];
-        sprintf(file, "%s/%s", folder, program);
-
-        if (!access(file, X_OK)) {
-            if (path_buffer) strcpy(path_buffer, file);
-            return true;
-        }
-    }
-
-    return false;
-}
-
-// SHELL
-
-typedef bool (*builtin_fun_t)(char *);
-typedef struct {
-    char *name;
-    bool needs_args;
-    builtin_fun_t program;
-} builtin_t;
-
-bool my_exit(char *);
-bool echo(char *);
-bool type(char *);
-bool pwd(char *);
-
-const builtin_t builtins[NUM_BUILTINS] = {
-    { "exit", false, my_exit },
-    { "echo", true,  echo },
-    { "type", true,  type },
-    { "pwd", false, pwd },
-};
-
-bool my_exit(char *_) {
-    return true;
-}
-
-bool echo(char *arguments) {
-    printf("%s\n", arguments);
-    return false;
-}
-
-bool which(char *arguments) {
-    return false;
-}
-
-bool type(char *arguments) {
-    bool is_builtin = false;
-    bool in_path = false;
-
-    for (size_t i = 0; i < NUM_BUILTINS; i++) {
-        is_builtin = strcmp(arguments, builtins[i].name) == 0;
-        if (is_builtin) break;
-    }
-
-    if (is_builtin) {
-        printf("%s is a shell builtin\n", arguments);
-        return false;
-    }
-
-    char path[BUFFER_SIZE];
-    if (find_program(path, arguments)) {
-        printf("%s is %s\n", arguments, path);
-        return false;
-    }
-
-    printf("%s: not found\n", arguments);
-
-    return false;
-}
-
-bool pwd(char *_) {
-    char *cwd = getcwd(NULL, 0);  // malloc's the right size
-    printf("%s\n", cwd);
-    free(cwd);
-
-    return false;
-}
 
 int main(int argc, char *argv[]) {
     // Flush after every printf
@@ -108,61 +17,26 @@ int main(int argc, char *argv[]) {
     while (true) {
         printf("$ ");
 
-        char command[BUFFER_SIZE];
-        fgets(command, BUFFER_SIZE, stdin);
-        command[strlen(command) - 1] = '\0';
+        char input[BUFFER_SIZE];
+        if (!fgets(input, BUFFER_SIZE, stdin)) break;
+        input[strcspn(input, "\n")] = '\0';
+
+        command_t command;
+        if (!parse(&command, input)) continue;
 
         // locate builtin commands
         const builtin_t *builtin = NULL;
-        for (int i = 0; i < NUM_BUILTINS; i++) {
-            bool found = false;
-            if (builtins[i].needs_args) {
-                char cmp_name[BUFFER_SIZE];
-                strcpy(cmp_name, builtins[i].name);
-                size_t len_name = strlen(builtins[i].name);
-                strcpy(cmp_name + len_name, " ");
-
-                found = !strncmp(cmp_name, command, 5);
-            } else {
-                found = !strcmp(builtins[i].name, command);
-            }
-
-            if (found) {
-                builtin = builtins + i;
-                break;
-            }
-        }
-
-        if (builtin) {
-            if (builtin->program(command + strlen(builtin->name) + 1))
+        if (find_builtin(&builtin, command.argv[0])) {
+            if (builtin->program(&command))
                 break;
             else
                 continue;
         }
 
-        // execute from path
-        char *exec_argv[BUFFER_SIZE] = { NULL };
-        char *arg = strtok(command, " ");
-        for (int i = 0; arg != NULL; i++) {
-            exec_argv[i] = arg;
-            arg = strtok(NULL, " ");
-        }
-
-        if (find_program(NULL, exec_argv[0]))
-        {
-            pid_t pid = fork();
-            if (pid == 0) {
-                execvp(exec_argv[0], exec_argv);
-            } else {
-                waitpid(pid, NULL, 0);
-            }
-
+        if (execute_external(&command)) 
             continue;
-        }
 
-
-        // error message
-        printf("%s: command not found\n", command);
+        printf("%s: command not found\n", command.argv[0]);
     }
 
     return 0;
