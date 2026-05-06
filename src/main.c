@@ -8,7 +8,7 @@
 #include <unistd.h>
 
 #define BUFFER_SIZE 1024
-#define NUM_BUILTINS 3
+#define NUM_BUILTINS 4
 
 // HELPER FUNCTIONS
 
@@ -46,11 +46,13 @@ typedef struct {
 bool my_exit(char *);
 bool echo(char *);
 bool type(char *);
+bool pwd(char *);
 
 const builtin_t builtins[NUM_BUILTINS] = {
     { "exit", false, my_exit },
     { "echo", true,  echo },
-    { "type", true,  type }
+    { "type", true,  type },
+    { "pwd", false, pwd },
 };
 
 bool my_exit(char *_) {
@@ -87,6 +89,14 @@ bool type(char *arguments) {
     }
 
     printf("%s: not found\n", arguments);
+
+    return false;
+}
+
+bool pwd(char *_) {
+    char *cwd = getcwd(NULL, 0);  // malloc's the right size
+    printf("%s\n", cwd);
+    free(cwd);
 
     return false;
 }
