@@ -78,7 +78,7 @@ bool pwd(const command_t *command) {
 }
 
 bool cd(const command_t *command) {
-    if (command->argc < 2) {
+    if (command->argc < 2 || command->argv[1][0] == '~') {
         chdir(getenv("HOME"));
         return false;
     }
