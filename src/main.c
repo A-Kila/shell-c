@@ -32,6 +32,8 @@ int main(int argc, char *argv[]) {
         }
 
         execute_external(&command);
+
+        command_free(&command);
     }
 
     return 0;

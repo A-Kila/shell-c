@@ -74,11 +74,6 @@ void pwd(const command_t *command) {
 }
 
 void cd(const command_t *command) {
-    if (command->argc < 2 || command->argv[1][0] == '~') {
-        chdir(getenv("HOME"));
-        return;
-    }
-
     if (chdir(command->argv[1]) != 0)
         printf("cd: %s: No such file or directory\n", command->argv[1]);
 }

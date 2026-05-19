@@ -6,5 +6,6 @@
 #include <stddef.h>
 
 bool parse(command_t *command_out, char *input);
+void command_free(command_t *command);
 
 #endif // !__PARSER_H__
