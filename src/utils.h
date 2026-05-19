@@ -3,6 +3,6 @@
 
 #include <stdbool.h>
 
-bool find_program(char *path_buffer, const char *const program);
+bool find_program_path(char *path_buffer, const char *const program);
 
 #endif // !__UTILS_H__

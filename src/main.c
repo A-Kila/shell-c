@@ -24,19 +24,14 @@ int main(int argc, char *argv[]) {
         command_t command;
         if (!parse(&command, input)) continue;
 
-        // locate builtin commands
-        const builtin_t *builtin = NULL;
-        if (find_builtin(&builtin, command.argv[0])) {
-            if (builtin->program(&command))
-                break;
-            else
-                continue;
+        // locate builtin commands; run if found;
+        const builtin_t *builtin = find_builtin(command.argv[0]);
+        if (builtin) {
+            builtin->program(&command);
+            continue;
         }
 
-        if (execute_external(&command)) 
-            continue;
-
-        printf("%s: command not found\n", command.argv[0]);
+        execute_external(&command);
     }
 
     return 0;

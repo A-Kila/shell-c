@@ -2,19 +2,21 @@
 
 #include "utils.h"
 #include <stddef.h>
+#include <stdio.h>
+#include <stdlib.h>
 #include <sys/wait.h>
 #include <unistd.h>
 
-bool execute_external(const command_t *command) {
-    if (!find_program(NULL, command->argv[0]))
-        return false;
-
+void execute_external(const command_t *command) {
     pid_t pid = fork();
     if (pid == 0) {
         execvp(command->argv[0], command->argv);
-    } else {
-        waitpid(pid, NULL, 0);
-    }
 
-    return true;
+        // perror(command->argv[0]);
+        printf("%s: command not found\n", command->argv[0]);
+ 
+        exit(1);
+    }
+ 
+    waitpid(pid, NULL, 0);
 }

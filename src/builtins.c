@@ -7,11 +7,11 @@
 #include <string.h>
 #include <unistd.h>
 
-bool my_exit(const command_t *);
-bool echo(const command_t *);
-bool type(const command_t *);
-bool pwd(const command_t *);
-bool cd(const command_t *);
+void my_exit(const command_t *);
+void echo(const command_t *);
+void type(const command_t *);
+void pwd(const command_t *);
+void cd(const command_t *);
 
 const builtin_t builtins[] = {
     { "exit", my_exit },
@@ -25,26 +25,26 @@ static size_t len_builtins() {
     return sizeof(builtins) / sizeof(builtin_t);
 }
 
-bool my_exit(const command_t *) { 
-    return true; 
+void my_exit(const command_t *command) {
+    int status = (command->argc < 2) ? 0 : atoi(command->argv[1]);
+
+    exit(status);
 }
 
-bool echo(const command_t *command) {
+void echo(const command_t *command) {
     for (int i = 1; i < command->argc; i++) {
         if (i > 1) printf(" ");
         printf("%s", command->argv[i]);
     }
     printf("\n");
-    
-    return false;
 }
 
-bool type(const command_t *command) {
+void type(const command_t *command) {
     bool is_builtin = false;
     size_t num_builtins = len_builtins();
 
     if (command->argc < 2) {
-        return false;
+        return;
     }
 
     for (size_t i = 0; i < num_builtins; i++) {
@@ -55,54 +55,42 @@ bool type(const command_t *command) {
 
     if (is_builtin) {
         printf("%s is a shell builtin\n", command->argv[1]);
-        return false;
+        return;
     }
 
     char path[BUFFER_SIZE];
-    if (find_program(path, command->argv[1])) {
+    if (find_program_path(path, command->argv[1])) {
         printf("%s is %s\n", command->argv[1], path);
-        return false;
+        return;
     }
 
     printf("%s: not found\n", command->argv[1]);
-
-    return false;
 }
 
-bool pwd(const command_t *command) {
+void pwd(const command_t *command) {
     char *cwd = getcwd(NULL, 0); // malloc's the right size
     printf("%s\n", cwd);
     free(cwd);
-
-    return false;
 }
 
-bool cd(const command_t *command) {
+void cd(const command_t *command) {
     if (command->argc < 2 || command->argv[1][0] == '~') {
         chdir(getenv("HOME"));
-        return false;
+        return;
     }
 
-    if (chdir(command->argv[1]) != 0) {
+    if (chdir(command->argv[1]) != 0)
         printf("cd: %s: No such file or directory\n", command->argv[1]);
-    }
-
-    return false;
 }
 
-bool find_builtin(const builtin_t **builtin_out, const char *cmd_name) {
+const builtin_t *find_builtin(const char *cmd_name) {
     size_t num_builtins = len_builtins();
 
     for (int i = 0; i < num_builtins; i++) {
-        bool found = false;
-        found = !strcmp(builtins[i].name, cmd_name);
-
-        if (found) {
-            *builtin_out = builtins + i;
-            return true;
-        }
+        if (!strcmp(builtins[i].name, cmd_name))
+            return builtins + i;
     }
 
-    return false;
+    return NULL;
 }
 

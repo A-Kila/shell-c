@@ -6,7 +6,7 @@
 #include <string.h>
 #include <unistd.h>
 
-bool find_program(char *path_buffer, const char *const program) {
+bool find_program_path(char *path_buffer, const char *const program) {
     char *path_env = getenv("PATH");
     if (path_env == NULL || strlen(path_env) == 0) return false;
 
