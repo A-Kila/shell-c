@@ -32,6 +32,7 @@ static char *handle_sqoutes(const char *token, char **rest) {
     }
 
     if (inside && *rest) {
+        buf[len++] = ' ';
         for (char *ch = *rest; true; ch++) {
             if (*ch == '\0') { 
                 *rest = NULL; 
