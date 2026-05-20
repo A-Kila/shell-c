@@ -17,35 +17,42 @@ static char *replace_home(const char *token) {
     return replaced;
 }
 
-static char *strcat_heap(const char *str1, const char *str2, bool is_space) {
-    char *res = malloc(strlen(str1) + strlen(str2) + (is_space ? 2 : 1));
-    strcat(res, str1);
-    if (is_space) strcat(res, " ");
-    strcat(res, str2);
-
-    return res;
-}
-
 static char *handle_sqoutes(const char *token, char **rest) {
-    if (!*rest) *rest = "";
+    char buf[BUFFER_SIZE] = {0};
+    size_t len = 0;
+    bool inside = false;
 
-    char *full_string = strcat_heap(token, *rest, true);
-
-    char *res = NULL;
-    size_t res_len = 0;
-    for (token = strtok_r(full_string, "'", rest); token; token = strtok_r(*rest, "'", rest)) {
-        if (!res) {
-            res = strdup(token);
-            continue;
+    for (const char *ch = token; *ch; ch++) {
+        if (*ch == '\'') {
+            inside = !inside; 
+            continue; 
         }
-        char *tmp = res;
-        res = strcat_heap(res, token, false);
-        free(tmp);
 
-        if (*rest && *rest[0] == ' ') break;
+        buf[len++] = *ch;
     }
 
-    return res;
+    if (inside && *rest) {
+        for (char *ch = *rest; true; ch++) {
+            if (*ch == '\0') { 
+                *rest = NULL; 
+                break; 
+            }
+ 
+            if (*ch == '\'') { 
+                inside = !inside; 
+                continue; 
+            }
+
+            if (!inside && *ch == ' ') { 
+                *rest = ch + 1; 
+                break; 
+            }
+
+            buf[len++] = *ch;
+        }
+    }
+
+    return strdup(buf);
 }
 
 bool parse(command_t *command_out, char *input) {
@@ -58,7 +65,7 @@ bool parse(command_t *command_out, char *input) {
         char *argv = NULL;
 
         if (index(token, '\'')) argv = handle_sqoutes(token, &rest);
-        if (token[0] == '~') argv = replace_home(token);
+        else if (token[0] == '~') argv = replace_home(token);
 
         if (!argv) argv = strdup(token);
         command_out->argv[command_out->argc++] = argv;
