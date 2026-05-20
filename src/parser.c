@@ -1,7 +1,6 @@
 #include "parser.h"
 #include "shell.h"
-#include <_string.h>
-#include <_strings.h>
+#include <string.h>
 #include <stddef.h>
 #include <stdio.h>
 #include <stdlib.h>
