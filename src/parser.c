@@ -32,12 +32,12 @@ bool parse(command_t *command_out, char *input) {
 
         if (*ch == '\0' || (*ch == ' ' && !inside_sq)) {
             if (len > 0) {
+                buf[len] = '\0';
                 char *arg = (buf[0] == '~') ? replace_head(buf) : NULL;
 
                 if (!arg) arg = strdup(buf);
                 command_out->argv[command_out->argc++] = arg;
  
-                buf[len] = '\0';
                 len = 0;
             }
 
