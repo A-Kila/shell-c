@@ -4,7 +4,6 @@
 #include <stddef.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include <string.h>
 
 #define NULL_CHAR '\0'
 #define SPACE ' '
@@ -33,7 +32,7 @@ bool parse(command_t *command_out, char *input) {
     bool inside_sq = false, inside_dq = false;
     bool special = false;
 
-    for (char *ch = input; ; ch++) {
+    for (char *ch = input; len < BUFFER_SIZE && command_out->argc < MAX_ARGS; ch++) {
         if (special) {
             special = false;
             goto buf_add;
