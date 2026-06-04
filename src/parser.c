@@ -31,8 +31,14 @@ bool parse(command_t *command_out, char *input) {
     char buf[BUFFER_SIZE];
     size_t len = 0;
     bool inside_sq, inside_dq = false;
+    bool special = false;
 
     for (char *ch = input; ; ch++) {
+        if (special) {
+            special = false;
+            goto buf_add;
+        }
+
         if (!inside_dq && *ch == SINGLE_QUOTE) {
             inside_sq = !inside_sq;
             continue;
@@ -40,6 +46,11 @@ bool parse(command_t *command_out, char *input) {
 
         if (!inside_sq && *ch == DOUBLE_QUOTE) {
             inside_dq = !inside_dq;
+            continue;
+        }
+
+        if (*ch == ESCAPE) {
+            special = true;
             continue;
         }
 
@@ -59,6 +70,7 @@ bool parse(command_t *command_out, char *input) {
             continue;
         }
 
+buf_add:
         buf[len++] = *ch;
     }
 
