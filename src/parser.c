@@ -30,7 +30,7 @@ bool parse(command_t *command_out, char *input) {
 
     char buf[BUFFER_SIZE];
     size_t len = 0;
-    bool inside_sq, inside_dq = false;
+    bool inside_sq = false, inside_dq = false;
     bool special = false;
 
     for (char *ch = input; ; ch++) {
@@ -49,7 +49,7 @@ bool parse(command_t *command_out, char *input) {
             continue;
         }
 
-        if (*ch == ESCAPE) {
+        if (!inside_sq && *ch == ESCAPE) {
             special = true;
             continue;
         }
